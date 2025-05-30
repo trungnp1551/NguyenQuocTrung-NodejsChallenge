@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String         @id @default(uuid())
+  email    String         @unique
+  password String
+  likes    ProductLike[]
+  products Product[]      @relation("CreatedProducts")
+  createdAt DateTime       @default(now())
+}
+
+model Product {
+  id          String         @id @default(uuid())
+  name        String
+  price       Float
+  category    String
+  subcategory String
+  createdBy   User           @relation("CreatedProducts", fields: [createdById], references: [id])
+  createdById String
+  likes       ProductLike[]
+  createdAt   DateTime       @default(now())
+}
+
+model ProductLike {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  type      LikeType @default(LIKE)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+enum LikeType {
+  LIKE
+  DISLIKE
+}
