@@ -88,7 +88,7 @@ export const createProduct = async (req: AuthRequest, res: Response): Promise<vo
     res.status(201).json({ success: true, data: product });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    sendResponse(res, 500, false, "Server error");
   }
 };
 
@@ -104,6 +104,11 @@ export const reactToProduct = async (req: AuthRequest, res: Response) => {
 
     const result = await productService.toggleLikeDislike(productId, userId!, type);
     const counts = await productService.countProductReactions(productId);
+    
+    const keys = await redis.keys('products:*');
+    if (keys.length > 0) {
+      await redis.del(keys);
+    }
 
     return sendResponse(res, 200, true, `Reaction ${result.status}`, {
       currentType: result.type,

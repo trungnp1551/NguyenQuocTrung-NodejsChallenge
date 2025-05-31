@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as userService from "../services/user.service";
+import * as authService from "../services/auth.service";
 import jwt from "jsonwebtoken";
 import { sendResponse } from '../common/response';
 
@@ -13,13 +14,13 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const existingUser = await userService.findUserByEmail(email);
+    const existingUser = await authService.findUserByEmail(email);
     if (existingUser) {
       sendResponse(res, 409, false, "Email already exists");
       return;
     }
 
-    const user = await userService.registerUser({ email, password });
+    const user = await authService.registerUser({ email, password });
     sendResponse(res, 201, true, "Register successful", { id: user.id, email: user.email })
   } catch (error) {
     sendResponse(res, 500, false, "Server error");
@@ -34,13 +35,13 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const user = await userService.findUserByEmail(email);
+    const user = await authService.findUserByEmail(email);
     if (!user) {
       sendResponse(res, 401, false, "Invalid credentials");
       return;
     }
 
-    const valid = await userService.verifyUserPassword(user.password, password);
+    const valid = await authService.verifyUserPassword(user.password, password);
     if (!valid) {
       sendResponse(res, 401, false, "Invalid credentials");
       return;
