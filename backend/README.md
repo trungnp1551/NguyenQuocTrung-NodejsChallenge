@@ -87,10 +87,10 @@ npm run start
 - Only authenticated users can add or like products
 - Guests can only view products
 
-### 🛆 Product Features
+### 🗆 Product Features
 
-- Create, read, update, delete (CRUD)
-- Product likes with optimistic UI support
+- Supports English and Vietnamese in responses
+- Language is determined by the `Accept-Language` header (e.g., `en` or `vi`)
 
 ### 🔍 Searching & Pagination
 
@@ -101,6 +101,21 @@ npm run start
 
 - Redis is used to cache `GET /products` responses
 - Cache is **invalidated** when a new product is added or a product is liked
+
+### 💬 Explanation of Caching & Optimization Strategies
+
+- When a user requests `GET /products`, the backend first checks Redis:
+
+  - If data is **cached**, it returns immediately (reduces database load)
+  - If data is **not cached**, it queries the database and stores the result in Redis
+
+- When a **new product is created** or a **like is added**, the cache is cleared to prevent stale data
+
+### 👍 Like Feature with Optimistic UI
+
+- When a user likes a product, the UI updates **immediately** (optimistic update)
+- Meanwhile, a request is sent to the backend to update the database
+- If the request fails, the frontend can rollback the like count
 
 ---
 
